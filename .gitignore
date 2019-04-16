@@ -14,3 +14,5 @@
 rest_api/test.py
 *.mwb
 rest_api/config/credentials.json
+*.xml
+*.iml
