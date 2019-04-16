@@ -12,3 +12,5 @@
 *.out
 .DS_Store
 rest_api/test.py
+*.mwb
+rest_api/config/credentials.json
