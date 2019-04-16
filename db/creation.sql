@@ -1,14 +1,25 @@
+-- -----------------------------------------------------
+-- Schema playstation
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `playstation` DEFAULT CHARACTER SET utf8 ;
+USE `playstation` ;
 
 -- -----------------------------------------------------
--- Schema ps4-recommendation-system
+-- Table `playstation`.`auth`
 -- -----------------------------------------------------
-CREATE SCHEMA IF NOT EXISTS `ps4-recommendation-system` DEFAULT CHARACTER SET utf8 ;
-USE `ps4-recommendation-system` ;
- 
+CREATE TABLE IF NOT EXISTS `playstation`.`auth` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `session_key` VARCHAR(64) NULL,
+  `timestamp` DATETIME NULL,
+  `uid` INT NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB;
+
+
 -- -----------------------------------------------------
--- Table `ps4-recommendation-system`.`users`
+-- Table `playstation`.`users`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `ps4-recommendation-system`.`users` (
+CREATE TABLE IF NOT EXISTS `playstation`.`users` (
   `timestamp_creation` DATETIME NULL,
   `uid` INT NOT NULL AUTO_INCREMENT,
   `login` VARCHAR(16) NULL,
@@ -18,31 +29,12 @@ CREATE TABLE IF NOT EXISTS `ps4-recommendation-system`.`users` (
   `favorite_genres` LONGTEXT NULL,
   PRIMARY KEY (`uid`))
 ENGINE = InnoDB;
- 
- 
+
+
 -- -----------------------------------------------------
--- Table `ps4-recommendation-system`.`auth`
+-- Table `playstation`.`games`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `ps4-recommendation-system`.`auth` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `session_key` VARCHAR(64) NULL,
-  `timestamp` DATETIME NULL,
-  `uid` INT NULL,
-  `users_uid` INT NOT NULL,
-  PRIMARY KEY (`id`),
-  INDEX `fk_auth_users_idx` (`users_uid` ASC),
-  CONSTRAINT `fk_auth_users`
-    FOREIGN KEY (`users_uid`)
-    REFERENCES `ps4-recommendation-system`.`users` (`uid`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
- 
- 
--- -----------------------------------------------------
--- Table `ps4-recommendation-system`.`games`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `ps4-recommendation-system`.`games` (
+CREATE TABLE IF NOT EXISTS `playstation`.`games` (
   `game_id` INT NOT NULL AUTO_INCREMENT,
   `genres` TEXT(250) NULL,
   `rating` VARCHAR(1) NULL,

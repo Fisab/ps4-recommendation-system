@@ -11,6 +11,7 @@ type Credentials struct {
 		Password string `json:"password"`
 		IP       string `json:"ip"`
 		Port     int    `json:"port"`
+		Database string `json:"database"`
 	} `json:"mysql"`
 }
 
@@ -19,6 +20,7 @@ type Mysql struct {
 		Password string `json:"password"`
 		IP       string `json:"ip"`
 		Port     int    `json:"port"`
+		Database string `json:"database"`
 }
 
 func GetMysqlConfig() (Mysql) {
