@@ -73,7 +73,7 @@ func auth(w http.ResponseWriter, r *http.Request) {
 			database.CleanOldCookie(uid)
 			status := database.AuthUser(uid, cookie)
 			if status == true {
-				payload := httpResponse{http.StatusOK, "Welcome"}
+				payload := httpResponse{http.StatusOK, "yo"}
 
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusOK)
@@ -115,7 +115,7 @@ func registerUser(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
 			fmt.Fprint(w, payload)
 		} else {
-			payload := httpResponse{http.StatusBadRequest, msg}
+			payload := httpResponse{http.StatusConflict, msg}
 
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
@@ -127,7 +127,7 @@ func registerUser(w http.ResponseWriter, r *http.Request) {
 func getFavoriteGenres(w http.ResponseWriter, r *http.Request) {
 	c, err := r.Cookie("session_key")
 	if err != nil {
-		payload := httpResponse{http.StatusForbidden, "What are junkie doing there?! Maybe u finally pass the cookies?"}
+		payload := httpResponse{http.StatusBadRequest, "What are junkie doing there?! Maybe u finally pass the cookies?"}
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
