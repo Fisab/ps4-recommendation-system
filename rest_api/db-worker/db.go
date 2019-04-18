@@ -5,9 +5,8 @@ import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
-	"go/types"
-	"time"
 	"strings"
+	"time"
 )
 
 type Auth struct {
@@ -38,6 +37,7 @@ func AuthUser(uid int, sessionKey string) bool {
 			(?, ?, ?);`
 	_, err := conn.Exec(sqlQuery, sessionKey, time.Now().Format(time.RFC3339), uid)
 	if err != nil {
+		fmt.Println(err)
 		return false
 	}
 
@@ -74,13 +74,51 @@ func GetFavGenresByUid(uid int) (bool, []string) {
 	if len(data) == 0 {
 		return false, nil
 	} else {
-		if len(data) > 0 {
-			if len(data[0].FavoriteGenres) == 0 {
-				return true, nil
-			} else {
-				return true, strings.Split(data[0].FavoriteGenres, ",")
-			}
+		if len(data[0].FavoriteGenres) == 0 {
+			return true, nil
+		} else {
+			return true, strings.Split(data[0].FavoriteGenres, ",")
 		}
+	}
+}
+
+func RegisterUser(login string, pass string, email string) (bool, string) {
+	conn := Conn()
+
+	userExist := checkUserExist(login)
+
+	if userExist == true {
+		return false, "U want keep alien login?"
+	}
+
+	sqlQuery := `
+		INSERT INTO 
+			users 
+			(timestamp_creation, login, password, mail, wishlist, favorite_genres)
+		VALUES 
+			('?', '?', '?', '?', '?', '?');`
+	_, err := conn.Exec(sqlQuery, time.Now().Format(time.RFC3339), login, pass, email, "", "")
+	if err != nil {
+		fmt.Println(err)
+		return false, "Server is tired, that's what it said :" + err.Error()
+	}
+
+	return true, "Now u're in a gang"
+}
+
+func checkUserExist(login string) bool {
+	conn := Conn()
+	var data []User
+
+	sqlQuery := fmt.Sprintf("SELECT * FROM users WHERE login = '%s'", login)
+	err := conn.Select(&data, sqlQuery)
+	if err != nil {
+		panic(err)
+	}
+	if len(data) == 0 {
+		return false
+	} else {
+		return true
 	}
 }
 

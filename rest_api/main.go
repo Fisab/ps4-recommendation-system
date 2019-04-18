@@ -35,7 +35,9 @@ func dir(obj interface{}) {
 func main() {
 	router := mux.NewRouter()
 
-	router.HandleFunc("/auth", auth).Methods("GET")
+	router.HandleFunc("/auth", auth).Methods("POST")
+	router.HandleFunc("/register", registerUser).Methods("POST")
+
 	router.HandleFunc("/getFavoriteGenres", getFavoriteGenres).Methods("GET")
 
 	log.Fatal(http.ListenAndServe(":8000", router))
@@ -55,12 +57,11 @@ func auth(w http.ResponseWriter, r *http.Request) {
 	password := r.Header.Get("password")
 
 	if len(login) == 0 || len(password) == 0 {
-		payload := httpResponse{500, "U must give me ur login and sha256 of pass"}
+		payload := httpResponse{http.StatusBadRequest, "U must give me ur login and sha256 of pass"}
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w, payload)
-		return
 	} else {
 		userExist, uid := database.ValidateUser(login, password)
 		if userExist == true {
@@ -71,18 +72,46 @@ func auth(w http.ResponseWriter, r *http.Request) {
 
 			database.CleanOldCookie(uid)
 
-			payload := httpResponse{200, "Welcome"}
+			payload := httpResponse{http.StatusOK, "Welcome"}
 
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
 			fmt.Fprint(w, payload)
 		} else {
-			payload := httpResponse{403, "Wrong pass or login ;("}
+			payload := httpResponse{http.StatusForbidden, "Wrong pass or login ;("}
 
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusInternalServerError)
 			fmt.Fprint(w, payload)
-			return
+		}
+	}
+}
+
+func registerUser(w http.ResponseWriter, r *http.Request) {
+	login := r.Header.Get("login")
+	password := r.Header.Get("password")
+	email := r.Header.Get("email")
+
+	if len(login) == 0 || len(password) == 0 {
+		payload := httpResponse{http.StatusBadRequest, "U must give me ur login and sha256 of pass\n P.S. Everything is written in the docs"}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, payload)
+	} else {
+		status, msg := database.RegisterUser(login, password, email)
+		if status == true {
+			payload := httpResponse{http.StatusAccepted, msg}
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			fmt.Fprint(w, payload)
+		} else {
+			payload := httpResponse{http.StatusBadRequest, msg}
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			fmt.Fprint(w, payload)
 		}
 	}
 }
@@ -90,12 +119,11 @@ func auth(w http.ResponseWriter, r *http.Request) {
 func getFavoriteGenres(w http.ResponseWriter, r *http.Request) {
 	c, err := r.Cookie("session_key")
 	if err != nil {
-		payload := httpResponse{403, "What are junkie doing there?! Maybe u finally pass the cookies?"}
+		payload := httpResponse{http.StatusForbidden, "What are junkie doing there?! Maybe u finally pass the cookies?"}
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w, payload)
-		return
 	} else {
 		// validate cookie
 		validUser, uid := database.CheckAuthedUser(c.Value)
@@ -103,19 +131,18 @@ func getFavoriteGenres(w http.ResponseWriter, r *http.Request) {
 			// retrieve favorite genres for this cookie(get uid and then get fv genres)
 			status, genres := database.GetFavGenresByUid(uid)
 			if status == true {
-				payload := httpResponseFavGenres{200, "Welcome", genres}
+				payload := httpResponseFavGenres{http.StatusOK, "Welcome", genres}
 
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusOK)
 				fmt.Fprint(w, payload)
 			}
 		} else {
-			payload := httpResponse{403, "Stop this... Let's just chill(wrong cookie)"}
+			payload := httpResponse{http.StatusForbidden, "Stop this... Let's just chill(wrong cookie)"}
 
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusInternalServerError)
 			fmt.Fprint(w, payload)
-			return
 		}
 	}
 
