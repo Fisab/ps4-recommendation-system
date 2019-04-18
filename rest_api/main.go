@@ -71,12 +71,20 @@ func auth(w http.ResponseWriter, r *http.Request) {
 			addCookie(w, "session_key", cookie)
 
 			database.CleanOldCookie(uid)
+			status := database.AuthUser(uid, cookie)
+			if status == true {
+				payload := httpResponse{http.StatusOK, "Welcome"}
 
-			payload := httpResponse{http.StatusOK, "Welcome"}
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusOK)
+				fmt.Fprint(w, payload)
+			} else {
+				payload := httpResponse{http.StatusInternalServerError, "idk what happened, seems something bad"}
 
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			fmt.Fprint(w, payload)
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusInternalServerError)
+				fmt.Fprint(w, payload)
+			}
 		} else {
 			payload := httpResponse{http.StatusForbidden, "Wrong pass or login ;("}
 
