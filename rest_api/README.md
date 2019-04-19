@@ -3,9 +3,9 @@
   
 ### /register [POST]  
 Required params:  
-- login  
-- password  
-- mail(optional)  
+- `login` 
+- `password`
+- `email`(optional)  
   
 Return:  
  
@@ -18,8 +18,8 @@ Return:
 ---
 ### /auth [POST]
 Required params:  
-- login  
-- password  
+- `login`  
+- `password`  
 
 Return:
  - Bad login/pass(len is 0)
