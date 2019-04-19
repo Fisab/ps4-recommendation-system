@@ -91,7 +91,7 @@ func RegisterUser(login string, pass string, email string) (bool, string) {
 		return false, "U want keep alien login?"
 	}
 
-	sqlQuery := fmt.Sprintf("INSERT INTO users (timestamp_creation, login, password, mail, wishlist, favorite_genres) VALUES ('%s', '%s', '%s', '%s', '%s', '%s');", time.Now().Format(time.RFC3339), login, pass, email, "", "")
+	sqlQuery := fmt.Sprintf("INSERT INTO users (timestamp_creation, login, password, mail, wishlist, favorite_genres) VALUES ('%s', '%s', '%s', '%s', '%s', '%s');", time.Now().Format("2006-01-02T15:04:05"), login, pass, email, "", "")
 	_, err := conn.Exec(sqlQuery)
 	if err != nil {
 		fmt.Println(err)
