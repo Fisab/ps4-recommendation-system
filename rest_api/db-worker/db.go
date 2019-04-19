@@ -91,13 +91,8 @@ func RegisterUser(login string, pass string, email string) (bool, string) {
 		return false, "U want keep alien login?"
 	}
 
-	sqlQuery := `
-		INSERT INTO 
-			users 
-			(timestamp_creation, login, password, mail, wishlist, favorite_genres)
-		VALUES 
-			('?', '?', '?', '?', '?', '?');`
-	_, err := conn.Exec(sqlQuery, time.Now().Format(time.RFC3339), login, pass, email, "", "")
+	sqlQuery := fmt.Sprintf("INSERT INTO users (timestamp_creation, login, password, mail, wishlist, favorite_genres) VALUES ('%s', '%s', '%s', '%s', '%s', '%s');", time.Now().Format(time.RFC3339), login, pass, email, "", "")
+	_, err := conn.Exec(sqlQuery)
 	if err != nil {
 		fmt.Println(err)
 		return false, "Server is tired, that's what it said :" + err.Error()
