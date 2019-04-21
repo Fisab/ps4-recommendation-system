@@ -4,6 +4,7 @@ import (
 	"./db-worker"
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
 	"log"
@@ -14,14 +15,14 @@ import (
 )
 
 type httpResponse struct {
-	status_code int
-	status_msg  string
+	StatusCode int
+	StatusMsg  string
 }
 
 type httpResponseFavGenres struct {
-	status_code int
-	status_msg  string
-	result      []string
+	StatusCode int
+	StatusMsg  string
+	Result      []string
 }
 
 func dir(obj interface{}) {
@@ -61,7 +62,13 @@ func auth(w http.ResponseWriter, r *http.Request) {
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprint(w, payload)
+		js, err := json.Marshal(payload)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		fmt.Fprint(w, string(js))
 	} else {
 		userExist, uid := database.ValidateUser(login, password)
 		if userExist == true {
@@ -77,20 +84,38 @@ func auth(w http.ResponseWriter, r *http.Request) {
 
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusOK)
-				fmt.Fprint(w, payload)
+				js, err := json.Marshal(payload)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+
+				fmt.Fprint(w, string(js))
 			} else {
 				payload := httpResponse{http.StatusInternalServerError, "idk what happened, seems something bad"}
 
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusInternalServerError)
-				fmt.Fprint(w, payload)
+				js, err := json.Marshal(payload)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+
+				fmt.Fprint(w, string(js))
 			}
 		} else {
 			payload := httpResponse{http.StatusForbidden, "Wrong pass or login ;("}
 
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprint(w, payload)
+			js, err := json.Marshal(payload)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			fmt.Fprint(w, string(js))
 		}
 	}
 }
@@ -105,7 +130,13 @@ func registerUser(w http.ResponseWriter, r *http.Request) {
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprint(w, payload)
+		js, err := json.Marshal(payload)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		fmt.Fprint(w, string(js))
 	} else {
 		status, msg := database.RegisterUser(login, password, email)
 		if status == true {
@@ -113,13 +144,28 @@ func registerUser(w http.ResponseWriter, r *http.Request) {
 
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
-			fmt.Fprint(w, payload)
+
+			js, err := json.Marshal(payload)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			fmt.Fprint(w, string(js))
+
 		} else {
 			payload := httpResponse{http.StatusConflict, msg}
 
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
-			fmt.Fprint(w, payload)
+
+			js, err := json.Marshal(payload)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			fmt.Fprint(w, string(js))
 		}
 	}
 }
@@ -131,7 +177,13 @@ func getFavoriteGenres(w http.ResponseWriter, r *http.Request) {
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprint(w, payload)
+		js, err := json.Marshal(payload)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		fmt.Fprint(w, string(js))
 	} else {
 		// validate cookie
 		validUser, uid := database.CheckAuthedUser(c.Value)
@@ -143,14 +195,26 @@ func getFavoriteGenres(w http.ResponseWriter, r *http.Request) {
 
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusOK)
-				fmt.Fprint(w, payload)
+				js, err := json.Marshal(payload)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+
+				fmt.Fprint(w, string(js))
 			}
 		} else {
 			payload := httpResponse{http.StatusForbidden, "Stop this... Let's just chill(wrong cookie)"}
 
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprint(w, payload)
+			js, err := json.Marshal(payload)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			fmt.Fprint(w, string(js))
 		}
 	}
 
