@@ -150,6 +150,7 @@ func registerUser(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
+			fmt.Println(string(js))
 
 			fmt.Fprint(w, string(js))
 

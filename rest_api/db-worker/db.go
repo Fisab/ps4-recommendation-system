@@ -35,7 +35,7 @@ func AuthUser(uid int, sessionKey string) bool {
 			(session_key, timestamp, uid)
 		VALUES 
 			(?, ?, ?);`
-	_, err := conn.Exec(sqlQuery, sessionKey, time.Now().Format(time.RFC3339), uid)
+	_, err := conn.Exec(sqlQuery, sessionKey, time.Now().Format("2006-01-02T15:04:05"), uid)
 	if err != nil {
 		fmt.Println(err)
 		return false
@@ -150,7 +150,7 @@ func CleanOldCookie(uid int) {
 	conn := Conn()
 
 	sqlQuery := `
-		DROP FROM 
+		DELETE FROM 
 			auth 
 		WHERE
 		 	uid = ?
