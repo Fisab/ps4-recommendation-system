@@ -47,3 +47,15 @@ CREATE TABLE IF NOT EXISTS `playstation`.`games` (
   `users_score` FLOAT NULL,
   PRIMARY KEY (`game_id`))
 ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `mydb`.`genres`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `playstation`.`genres` (
+  `genre_id` INT NOT NULL AUTO_INCREMENT,
+  `original_genre_name` VARCHAR(45) NULL,
+  `rus_genre_name` VARCHAR(45) NULL,
+  PRIMARY KEY (`genre_id`))
+ENGINE = InnoDB;
+
