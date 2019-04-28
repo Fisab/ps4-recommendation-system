@@ -25,6 +25,12 @@ type httpResponseFavGenres struct {
 	Result      []string
 }
 
+type httpResponseTopGames struct {
+	StatusCode int
+	StatusMsg  string
+	Result      []database.Game
+}
+
 func dir(obj interface{}) {
 	fooType := reflect.TypeOf(obj)
 	for i := 0; i < fooType.NumMethod(); i++ {
@@ -40,6 +46,7 @@ func main() {
 	router.HandleFunc("/register", registerUser).Methods("POST")
 
 	router.HandleFunc("/getFavoriteGenres", getFavoriteGenres).Methods("GET")
+	router.HandleFunc("/getTopGames", getTopGames).Methods("GET")
 
 	log.Fatal(http.ListenAndServe(":8000", router))
 }
@@ -219,4 +226,71 @@ func getFavoriteGenres(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+}
+
+func getTopGames(w http.ResponseWriter, r *http.Request) {
+	c, err := r.Cookie("session_key")
+	if err != nil {
+		payload := httpResponse{http.StatusBadRequest, "What are junkie doing there?! Maybe u finally pass the cookies?"}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		js, err := json.Marshal(payload)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		fmt.Fprint(w, string(js))
+	} else {
+		// validate cookie
+		validUser, _ := database.CheckAuthedUser(c.Value)
+		if validUser == true {
+			var gamesLimit []string
+			gamesLimit = r.URL.Query()["games_limit"]
+
+			if len(gamesLimit) == 0 {
+				gamesLimit = []string{"30"}
+			}
+
+			gamesLimitInt, err := strconv.ParseInt(gamesLimit[0], 10, 64)
+			if err != nil {
+				payload := httpResponse{http.StatusBadRequest, "Stop this... Let's just chill(wrong games_limit value)"}
+
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusInternalServerError)
+				js, err := json.Marshal(payload)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+
+				fmt.Fprint(w, string(js))
+			}
+			data := database.RetrieveTopGames(gamesLimitInt)
+			payload := httpResponseTopGames{http.StatusOK, "Welcome", data}
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			js, err := json.Marshal(payload)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			fmt.Fprint(w, string(js))
+		} else {
+			payload := httpResponse{http.StatusForbidden, "Stop this... Let's just chill(wrong cookie)"}
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			js, err := json.Marshal(payload)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			fmt.Fprint(w, string(js))
+		}
+	}
 }

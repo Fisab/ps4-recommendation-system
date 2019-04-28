@@ -26,6 +26,20 @@ type User struct {
 	FavoriteGenres string `db:"favorite_genres"`
 }
 
+type Game struct {
+	GameId        int     `db:"game_id"`
+	Genres        string  `db:"genres"`
+	Rating        string  `db:"rating"`
+	Developer     string  `db:"developer"`
+	OfPlayers     int     `db:"ofplayers"`
+	Name          string  `db:"name"`
+	ImgLink       string  `db:"img_link"`
+	Summary       string  `db:"summary"`
+	Metascore     int     `db:"metascore"`
+	UsersScore    float32 `db:"users_score"`
+	ProcessedName string  `db:"processed_name"`
+}
+
 func AuthUser(uid int, sessionKey string) bool {
 	conn := Conn()
 
@@ -189,4 +203,27 @@ func retrieveUidByCookie(cookie string) int {
 	} else {
 		return data[0].Uid
 	}
+}
+
+func RetrieveTopGames(limitGames int64) []Game {
+	sqlQuery := `
+		SELECT
+			*,
+			REPLACE(name, '-', ' ') as processed_name
+		FROM
+			games
+		ORDER BY
+			metascore
+		LIMIT %d;
+	`
+	sqlQuery = fmt.Sprintf(sqlQuery, limitGames)
+
+	conn := Conn()
+
+	var data []Game
+	err := conn.Select(&data, sqlQuery)
+	if err != nil {
+		panic(err)
+	}
+	return data
 }
