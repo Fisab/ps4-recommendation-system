@@ -47,7 +47,8 @@ Return:
 ### /getTopGames [GET]
 Required params:  
 - 🤨(cookie at header with key: "session_key")
-- `games_limit`(`int`) at `URL`
+- `games_limit`(`int`) at `URL` `<optional>`
+- `game_genre`(`string`) at `URL` `<optional>`
 
 Return:
 - Nothing for key "session_key"

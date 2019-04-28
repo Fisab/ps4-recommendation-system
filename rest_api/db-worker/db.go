@@ -205,18 +205,35 @@ func retrieveUidByCookie(cookie string) int {
 	}
 }
 
-func RetrieveTopGames(limitGames int64) []Game {
-	sqlQuery := `
-		SELECT
-			*,
-			REPLACE(name, '-', ' ') as processed_name
-		FROM
-			games
-		ORDER BY
-			metascore
-		LIMIT %d;
-	`
-	sqlQuery = fmt.Sprintf(sqlQuery, limitGames)
+func RetrieveTopGames(limitGames int64, gamesGenre string) []Game {
+	var sqlQuery string
+	if gamesGenre == "" {
+		sqlQuery = `
+			SELECT
+				*,
+				REPLACE(name, '-', ' ') as processed_name
+			FROM
+				games
+			ORDER BY
+				metascore
+			LIMIT %d;
+		`
+		sqlQuery = fmt.Sprintf(sqlQuery, limitGames)
+	} else {
+		sqlQuery = `
+			SELECT
+				*,
+				REPLACE(name, '-', ' ') as processed_name
+			FROM
+				games
+			WHERE
+				genres LIKE '%%%s%%'
+			ORDER BY
+				metascore
+			LIMIT %d;
+		`
+		sqlQuery = fmt.Sprintf(sqlQuery, gamesGenre, limitGames)
+	}
 
 	conn := Conn()
 

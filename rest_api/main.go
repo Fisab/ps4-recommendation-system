@@ -250,9 +250,13 @@ func getTopGames(w http.ResponseWriter, r *http.Request) {
 		if validUser == true {
 			var gamesLimit []string
 			gamesLimit = r.URL.Query()["games_limit"]
+			gamesGenre := r.URL.Query()["games_genre"]
 
 			if gamesLimit == nil || len(gamesLimit) == 0 {
 				gamesLimit = []string{"30"}
+			}
+			if gamesGenre == nil || len(gamesGenre) == 0 {
+				gamesGenre = []string{""}
 			}
 
 			gamesLimitInt, err := strconv.ParseInt(gamesLimit[0], 10, 64)
@@ -269,7 +273,7 @@ func getTopGames(w http.ResponseWriter, r *http.Request) {
 
 				fmt.Fprint(w, string(js))
 			}
-			data := database.RetrieveTopGames(gamesLimitInt)
+			data := database.RetrieveTopGames(gamesLimitInt, gamesGenre[0])
 			payload := httpResponseTopGames{http.StatusOK, "Here is our top", data}
 
 			w.Header().Set("Content-Type", "application/json")
