@@ -47,6 +47,8 @@ func main() {
 
 	router.HandleFunc("/getFavoriteGenres", getFavoriteGenres).Methods("GET")
 	router.HandleFunc("/getTopGames", getTopGames).Methods("GET")
+	router.HandleFunc("/searchGames", searchGames).Methods("GET")
+	router.HandleFunc("/getGameById", getGameById).Methods("GET")
 
 	log.Fatal(http.ListenAndServe(":8000", router))
 }
@@ -199,7 +201,7 @@ func getFavoriteGenres(w http.ResponseWriter, r *http.Request) {
 			// retrieve favorite genres for this cookie(get uid and then get fv genres)
 			status, genres := database.GetFavGenresByUid(uid)
 			if status == true {
-				payload := httpResponseFavGenres{http.StatusOK, "Welcome", genres}
+				payload := httpResponseFavGenres{http.StatusOK, "Here is ur favorite genres", genres}
 
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusOK)
@@ -249,7 +251,7 @@ func getTopGames(w http.ResponseWriter, r *http.Request) {
 			var gamesLimit []string
 			gamesLimit = r.URL.Query()["games_limit"]
 
-			if len(gamesLimit) == 0 {
+			if gamesLimit == nil || len(gamesLimit) == 0 {
 				gamesLimit = []string{"30"}
 			}
 
@@ -268,6 +270,140 @@ func getTopGames(w http.ResponseWriter, r *http.Request) {
 				fmt.Fprint(w, string(js))
 			}
 			data := database.RetrieveTopGames(gamesLimitInt)
+			payload := httpResponseTopGames{http.StatusOK, "Here is our top", data}
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			js, err := json.Marshal(payload)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			fmt.Fprint(w, string(js))
+		} else {
+			payload := httpResponse{http.StatusForbidden, "Stop this... Let's just chill(wrong cookie)"}
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			js, err := json.Marshal(payload)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			fmt.Fprint(w, string(js))
+		}
+	}
+}
+
+func searchGames(w http.ResponseWriter, r *http.Request) {
+	c, err := r.Cookie("session_key")
+	if err != nil {
+		payload := httpResponse{http.StatusBadRequest, "What are junkie doing there?! Maybe u finally pass the cookies?"}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		js, err := json.Marshal(payload)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		fmt.Fprint(w, string(js))
+	} else {
+		// validate cookie
+		validUser, _ := database.CheckAuthedUser(c.Value)
+		if validUser == true {
+			gameName := r.URL.Query()["game_name"]
+			if gameName == nil || len(gameName) == 0 {
+				payload := httpResponse{http.StatusBadRequest, "Stop this... Let's just chill(wrong game_name value)"}
+
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusInternalServerError)
+				js, err := json.Marshal(payload)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+
+				fmt.Fprint(w, string(js))
+			}
+			data := database.SearchGames(gameName[0])
+			payload := httpResponseTopGames{http.StatusOK, "Welcome", data}
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			js, err := json.Marshal(payload)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			fmt.Fprint(w, string(js))
+		} else {
+			payload := httpResponse{http.StatusForbidden, "Stop this... Let's just chill(wrong cookie)"}
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			js, err := json.Marshal(payload)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			fmt.Fprint(w, string(js))
+		}
+	}
+}
+
+func getGameById(w http.ResponseWriter, r *http.Request) {
+	c, err := r.Cookie("session_key")
+	if err != nil {
+		payload := httpResponse{http.StatusBadRequest, "What are junkie doing there?! Maybe u finally pass the cookies?"}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		js, err := json.Marshal(payload)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		fmt.Fprint(w, string(js))
+	} else {
+		// validate cookie
+		validUser, _ := database.CheckAuthedUser(c.Value)
+		if validUser == true {
+			gameId := r.URL.Query()["game_id"]
+			if gameId == nil || len(gameId) == 0 {
+				payload := httpResponse{http.StatusBadRequest, "Stop this... Let's just chill(wrong game_id value)"}
+
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusInternalServerError)
+				js, err := json.Marshal(payload)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+
+				fmt.Fprint(w, string(js))
+			}
+			gameIdInt, err := strconv.ParseInt(gameId[0], 10, 64)
+			if err != nil {
+				payload := httpResponse{http.StatusBadRequest, "Stop this... Let's just chill(wrong games_id value)"}
+
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusInternalServerError)
+				js, err := json.Marshal(payload)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+
+				fmt.Fprint(w, string(js))
+			}
+			data := database.GetGameById(gameIdInt)
 			payload := httpResponseTopGames{http.StatusOK, "Welcome", data}
 
 			w.Header().Set("Content-Type", "application/json")

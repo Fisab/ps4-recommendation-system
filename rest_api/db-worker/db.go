@@ -227,3 +227,52 @@ func RetrieveTopGames(limitGames int64) []Game {
 	}
 	return data
 }
+
+func SearchGames(gameName string) []Game {
+	sqlQuery := `
+		SELECT
+			*,
+			REPLACE(name, '-', ' ') as processed_name
+		FROM
+			games
+		WHERE
+			name LIKE '%%%s%%'
+		ORDER BY
+			metascore
+		LIMIT 20
+	`
+	sqlQuery = fmt.Sprintf(sqlQuery, gameName)
+
+	fmt.Println(sqlQuery)
+
+	conn := Conn()
+
+	var data []Game
+	err := conn.Select(&data, sqlQuery)
+	if err != nil {
+		panic(err)
+	}
+	return data
+}
+
+func GetGameById(gameId int64) []Game {
+	sqlQuery := `
+		SELECT
+			*,
+			REPLACE(name, '-', ' ') as processed_name
+		FROM
+			games
+		WHERE
+			game_id = %d
+	`
+	sqlQuery = fmt.Sprintf(sqlQuery, gameId)
+
+	conn := Conn()
+
+	var data []Game
+	err := conn.Select(&data, sqlQuery)
+	if err != nil {
+		panic(err)
+	}
+	return data
+}
