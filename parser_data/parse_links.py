@@ -4,6 +4,7 @@ from lxml import html
 import MySQLdb
 import MySQLdb.cursors
 import json
+import time
 
 
 with open('../rest_api/config/credentials.json') as json_file:  
@@ -43,6 +44,7 @@ def get_data(page_num=0):
 
 for i in range(10):
 	GAMES_LINKS.extend(get_data(i))
+	time.sleep(1)
 
 
 def get_info(link):
@@ -107,6 +109,7 @@ for i in range(1999):
 	print('%s/1999' % i)
 	try:
 		data = get_info(GAMES_LINKS[i])
+		time.sleep(0.5)
 	except:
 		continue
 	insert_sql(data)
