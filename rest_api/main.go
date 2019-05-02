@@ -49,6 +49,7 @@ func main() {
 	router.HandleFunc("/getTopGames", getTopGames).Methods("GET")
 	router.HandleFunc("/searchGames", searchGames).Methods("GET")
 	router.HandleFunc("/getGameById", getGameById).Methods("GET")
+	router.HandleFunc("/getGenres", getGenres).Methods("GET")
 
 	log.Fatal(http.ListenAndServe(":8000", router))
 }

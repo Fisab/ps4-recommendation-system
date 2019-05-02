@@ -84,10 +84,19 @@ Return:
 - Everything goes right
 	- `{"status_code": 200, "result": [{struct_game}, ...], "status_msg": ...}` 
 ---
-
-
+### /getGenres [GET]
+Required params:  
+- 🤨(cookie at header with key: "session_key")
 
 ### Here is struct of game:
+Return:
+- Nothing for key "session_key"
+	- `{"status_code": 400, "status_msg": ...}` 
+- Wrong cookie
+	- `{"status_code": 403, "status_msg": ...}` 
+- Everything goes right
+	- `{"status_code": 200, "result": ["genre_name", ...], "status_msg": ...}` 
+---
 
 ```	
 GameId        int
