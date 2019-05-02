@@ -293,3 +293,20 @@ func GetGameById(gameId int64) []Game {
 	}
 	return data
 }
+
+func GetGenres() []string {
+	sqlQuery := `
+		SELECT DISTINCT 
+			SUBSTRING_INDEX(genres, ',', 1) as genres
+		FROM
+			games;
+	`
+	conn := Conn()
+
+	var data []string
+	err := conn.Select(&data, sqlQuery)
+	if err != nil {
+		panic(err)
+	}
+	return data
+}
